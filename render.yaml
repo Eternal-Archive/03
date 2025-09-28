@@ -1,0 +1,40 @@
+previews:
+  generation: off
+
+envVarGroups:
+  - name: ea-common
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+
+services:
+  - type: web
+    runtime: docker
+    name: ea-api-us
+    region: virginia
+    plan: standard
+    branch: main
+    healthCheckPath: /health
+    preDeployCommand: pnpm --filter ea-api prisma:migrate:deploy
+    envVars:
+      - fromGroup: ea-common
+      - key: DATABASE_URL
+        sync: false   # 填 US 区 Cockroach 连接串
+      - key: JWT_SECRET
+        sync: false
+
+  - type: web
+    runtime: docker
+    name: ea-api-eu
+    region: frankfurt
+    plan: standard
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - fromGroup: ea-common
+      - key: DATABASE_URL
+        sync: false   # 填 EU 区 Cockroach 连接串
+      - key: JWT_SECRET
+        sync: false
