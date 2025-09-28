@@ -1,0 +1,17 @@
+// 仅示例，按你现有模型增补 crdb_region
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  // Cockroach 多区域：REGIONAL BY ROW 使用的分布列（字符串）
+  crdb_region String
+}

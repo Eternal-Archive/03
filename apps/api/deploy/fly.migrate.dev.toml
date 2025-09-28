@@ -1,0 +1,16 @@
+# Fly.io: Cockroach 迁移 Runner（dev）
+app = "ea-api-migrate-dev"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile.migrate"
+
+# 不暴露 HTTP 服务，按 CMD 运行一次即退出
+[processes]
+  migrate = ""
+
+# 关闭空闲保活
+[vm]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

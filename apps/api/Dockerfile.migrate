@@ -1,0 +1,21 @@
+# 负责在云端执行 "prisma migrate deploy" 的一次性 Runner
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 复用仓库根的 lock 与 package.json，确保依赖版本一致
+COPY ../../pnpm-lock.yaml ../../package.json ./
+RUN corepack enable && corepack prepare pnpm@9.11.0 --activate
+
+# 拷贝整个仓库（包含 apps/api 与 prisma/schema）
+COPY ../../ ./
+
+# 切到 API 子目录并安装依赖（包含 devDependencies，确保 prisma CLI 可用）
+WORKDIR /app/apps/api
+RUN pnpm install --frozen-lockfile --prod=false
+
+# 避免 prisma 更新提示干扰日志
+ENV PRISMA_HIDE_UPDATE_MESSAGE=1
+
+# 入口命令：部署迁移（使用环境变量 DATABASE_URL）
+CMD ["pnpx", "prisma", "migrate", "deploy"]
